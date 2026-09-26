@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/AuthContext'
 import Shell from './components/Shell'
 import Login from './pages/Login'
+import ResetPassword from './pages/ResetPassword'
 import JoinGroup from './pages/JoinGroup'
 import Book from './pages/Book'
 import MyBookings from './pages/MyBookings'
@@ -38,6 +39,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           element={
             <Gate>

@@ -6,7 +6,7 @@ import { Button, Field, inputCls, Panel, Toast } from '../components/ui'
 
 export default function Login() {
   const { session, loadingAuth } = useAuth()
-  const [mode, setMode] = useState('signin') // signin | signup
+  const [mode, setMode] = useState('signin') // signin | signup | reset
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
@@ -18,6 +18,22 @@ export default function Login() {
     e.preventDefault()
     setBusy(true)
     setToast(null)
+
+    if (mode === 'reset') {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
+      setBusy(false)
+      if (error) setToast({ kind: 'error', message: error.message })
+      else {
+        setToast({
+          kind: 'success',
+          message: "If that email has an account, we've sent a reset link. Check your inbox.",
+        })
+      }
+      return
+    }
+
     const fn = mode === 'signin' ? supabase.auth.signInWithPassword : supabase.auth.signUp
     const { error } = await fn({ email: email.trim(), password })
     setBusy(false)
@@ -49,27 +65,52 @@ export default function Login() {
                 autoComplete="email"
               />
             </Field>
-            <Field label="Password" hint={mode === 'signup' ? 'At least 6 characters' : undefined}>
-              <input
-                type="password"
-                required
-                minLength={6}
-                className={inputCls}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
-              />
-            </Field>
+            {mode !== 'reset' && (
+              <Field label="Password" hint={mode === 'signup' ? 'At least 6 characters' : undefined}>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  className={inputCls}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
+                />
+              </Field>
+            )}
             <Button type="submit" disabled={busy} className="w-full">
-              {busy ? 'Working…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+              {busy
+                ? 'Working…'
+                : mode === 'signin'
+                ? 'Sign in'
+                : mode === 'signup'
+                ? 'Create account'
+                : 'Send reset link'}
             </Button>
           </form>
 
+          {mode === 'signin' && (
+            <button
+              className="text-sm text-mute hover:text-ink mt-3 w-full text-center transition"
+              onClick={() => {
+                setMode('reset')
+                setToast(null)
+              }}
+            >
+              Forgot password?
+            </button>
+          )}
+
           <button
-            className="text-sm text-mute hover:text-ink mt-4 w-full text-center transition"
-            onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+            className="text-sm text-mute hover:text-ink mt-2 w-full text-center transition"
+            onClick={() => {
+              setMode(mode === 'signin' ? 'signup' : 'signin')
+              setToast(null)
+            }}
           >
-            {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+            {mode === 'signin' && "Don't have an account? Sign up"}
+            {mode === 'signup' && 'Already have an account? Sign in'}
+            {mode === 'reset' && 'Back to sign in'}
           </button>
         </Panel>
       </div>
