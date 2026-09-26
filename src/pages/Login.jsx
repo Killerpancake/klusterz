@@ -19,29 +19,33 @@ export default function Login() {
     setBusy(true)
     setToast(null)
 
-    if (mode === 'reset') {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: `${window.location.origin}/reset-password`,
-      })
-      setBusy(false)
-      if (error) setToast({ kind: 'error', message: error.message })
-      else {
+    try {
+      if (mode === 'reset') {
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${window.location.origin}/reset-password`,
+        })
+        if (error) throw error
         setToast({
           kind: 'success',
           message: "If that email has an account, we've sent a reset link. Check your inbox.",
         })
+        return
       }
-      return
-    }
 
-    const fn = mode === 'signin' ? supabase.auth.signInWithPassword : supabase.auth.signUp
-    const { error } = await fn({ email: email.trim(), password })
-    setBusy(false)
-    if (error) {
-      setToast({ kind: 'error', message: error.message })
-    } else if (mode === 'signup') {
-      setToast({ kind: 'success', message: 'Account created — you can sign in now.' })
-      setMode('signin')
+      const { error } =
+        mode === 'signin'
+          ? await supabase.auth.signInWithPassword({ email: email.trim(), password })
+          : await supabase.auth.signUp({ email: email.trim(), password })
+      if (error) throw error
+
+      if (mode === 'signup') {
+        setToast({ kind: 'success', message: 'Account created — you can sign in now.' })
+        setMode('signin')
+      }
+    } catch (err) {
+      setToast({ kind: 'error', message: err.message || 'Something went wrong. Please try again.' })
+    } finally {
+      setBusy(false)
     }
   }
 
