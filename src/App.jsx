@@ -9,6 +9,7 @@ import Book from './pages/Book'
 import MyBookings from './pages/MyBookings'
 import Timetable from './pages/Timetable'
 import AdminLive from './pages/AdminLive'
+import AdminGroups from './pages/AdminGroups'
 import AdminSettings from './pages/AdminSettings'
 import { Spinner } from './components/ui'
 
@@ -77,6 +78,14 @@ export default function App() {
             element={
               <NeedsAdmin>
                 <AdminLive />
+              </NeedsAdmin>
+            }
+          />
+          <Route
+            path="/admin/groups"
+            element={
+              <NeedsAdmin>
+                <AdminGroups />
               </NeedsAdmin>
             }
           />

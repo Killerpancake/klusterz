@@ -40,6 +40,7 @@ export default function Shell() {
           {isAdmin && (
             <>
               <NavItem to="/admin/live">Live view</NavItem>
+              <NavItem to="/admin/groups">Groups</NavItem>
               <NavItem to="/admin/settings">Settings</NavItem>
             </>
           )}
